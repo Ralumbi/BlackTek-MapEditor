@@ -1,0 +1,140 @@
+# ==============================================================================
+# Docker Compose Configuration for BlackTek Map Editor
+# ==============================================================================
+# This docker-compose file simplifies running the map editor with proper
+# X11 forwarding for GUI display, volume mounts for persistent data,
+# and network configuration for collaborative editing features.
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  # ==============================================================================
+  # Map Editor Service
+  # ==============================================================================
+  mapeditor:
+    # Build configuration
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # Use cache from previous builds to speed up rebuilds
+      cache_from:
+        - blacktek-mapeditor:latest
+    
+    # Image name and tag
+    image: blacktek-mapeditor:latest
+    
+    # Container name for easy reference
+    container_name: blacktek-mapeditor
+    
+    # ==============================================================================
+    # X11 Display Configuration
+    # ==============================================================================
+    # Enable GUI display by sharing the host's X11 socket
+    # ==============================================================================
+    environment:
+      # Use host's display
+      - DISPLAY=${DISPLAY:-:0}
+      # Optional: Disable access control (use with caution)
+      # - XAUTHORITY=/tmp/.docker.xauth
+    
+    # ==============================================================================
+    # Volume Mounts
+    # ==============================================================================
+    # Mount X11 socket for GUI display
+    # Mount application data for persistence between container restarts
+    # ==============================================================================
+    volumes:
+      # X11 socket for GUI
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Optional: Mount X authority file for better security
+      # - ${XAUTHORITY:-~/.Xauthority}:/tmp/.docker.xauth:ro
+      # Persist user data and configuration
+      - mapeditor-data:/app/data/user
+      # Optional: Mount maps directory from host for easy access
+      # - ./maps:/app/maps
+    
+    # ==============================================================================
+    # Network Configuration
+    # ==============================================================================
+    # Map editor may use network for collaborative features
+    # ==============================================================================
+    # ports:
+    #   - "7171:7171"  # Default port for collaborative editing (if needed)
+    
+    # ==============================================================================
+    # Device Access
+    # ==============================================================================
+    # Grant access to GPU for hardware acceleration (if available)
+    # ==============================================================================
+    devices:
+      - /dev/dri:/dev/dri  # GPU device for hardware acceleration
+    
+    # ==============================================================================
+    # Security Options
+    # ==============================================================================
+    # IPC host mode for X11 shared memory (improves GUI performance)
+    # ==============================================================================
+    ipc: host
+    
+    # ==============================================================================
+    # Resource Limits (Optional)
+    # ==============================================================================
+    # Limit resources to prevent container from consuming too much
+    # ==============================================================================
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '2'
+    #       memory: 2G
+    #     reservations:
+    #       cpus: '1'
+    #       memory: 512M
+    
+    # ==============================================================================
+    # Restart Policy
+    # ==============================================================================
+    # Restart policy (use 'no' for desktop applications)
+    # ==============================================================================
+    restart: "no"
+    
+    # ==============================================================================
+    # Network Mode (Optional)
+    # ==============================================================================
+    # Use host network for simpler setup (use with caution in production)
+    # ==============================================================================
+    # network_mode: "host"
+
+# ==============================================================================
+# Volumes
+# ==============================================================================
+# Define named volumes for persistent data
+# ==============================================================================
+volumes:
+  # Persistent storage for user data and configurations
+  mapeditor-data:
+    driver: local
+
+# ==============================================================================
+# Usage Instructions
+# ==============================================================================
+# 1. Build and start the container:
+#    docker-compose up --build
+#
+# 2. Run in detached mode:
+#    docker-compose up -d
+#
+# 3. View logs:
+#    docker-compose logs -f
+#
+# 4. Stop the container:
+#    docker-compose down
+#
+# 5. For X11 access on Linux, you may need to run:
+#    xhost +local:docker
+#    (Remember to run 'xhost -local:docker' after stopping the container)
+#
+# 6. For macOS users, install XQuartz and configure it to allow network connections
+#
+# 7. For Windows users, install an X server like VcXsrv or Xming
+# ==============================================================================
