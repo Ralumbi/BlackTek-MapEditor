@@ -1,0 +1,82 @@
+# ==============================================================================
+# .dockerignore - Files and directories to exclude from Docker build context
+# ==============================================================================
+# This file reduces build context size and speeds up builds by excluding
+# unnecessary files from being sent to the Docker daemon.
+# ==============================================================================
+
+# Git directory and files
+.git
+.gitignore
+.gitattributes
+
+# Build artifacts and outputs
+/build
+*.dll
+*.exe
+*.obj
+*.o
+*.a
+*.so
+*.dylib
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.idb
+*.map
+*.MAP
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Visual Studio files
+*.user
+*.APS
+*.opensdf
+*.sdf
+*.suo
+*.db
+*.opendb
+*.filters
+/.vs
+*.sln
+*.vcxproj
+*.vcxproj.user
+vcproj/
+
+# CMake build directories
+cmake-build-*/
+
+# vcpkg installed dependencies (will be rebuilt in container)
+/vcpkg_installed
+
+# Xcode files
+xcuserdata
+*.xcworkspace
+
+# Documentation and non-essential files
+*.md
+!README.md
+CHANGELOG.md
+LICENSE.rtf
+
+# RME runtime config (user-specific)
+rme.cfg
+data/user
+
+# Temporary files
+/tmp
+*.tmp
+*.log
+
+# macOS specific
+.DS_Store
+
+# Editor config (not needed in container)
+.editorconfig

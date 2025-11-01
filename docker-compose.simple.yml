@@ -1,0 +1,13 @@
+# ==============================================================================
+# Docker Compose Override for Simplified Build
+# ==============================================================================
+# Use this with: docker-compose -f docker-compose.yml -f docker-compose.simple.yml up
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  mapeditor:
+    build:
+      dockerfile: Dockerfile.simple
+    image: blacktek-mapeditor:simple

@@ -44,3 +44,18 @@ Required libraries:
 [Compile on Arch Linux](https://github.com/hjnilsson/rme/wiki/Compiling-on-Arch-Linux)
 
 [Compile on macOS](https://github.com/hjnilsson/rme/wiki/Compiling-on-macOS)
+
+Docker
+======
+Run the map editor in a containerized environment for easy deployment:
+
+* [Docker Quick Start](DOCKER_QUICKSTART.md) - Get started in minutes
+* [Complete Docker Guide](DOCKER.md) - Full documentation
+* [Build Notes](DOCKER_BUILD_NOTES.md) - Troubleshooting and advanced topics
+
+**Quick start:**
+```bash
+docker-compose up --build
+```
+
+See the documentation above for platform-specific instructions (Linux, macOS, Windows).
