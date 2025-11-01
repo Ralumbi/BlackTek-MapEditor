@@ -9,8 +9,8 @@
 # ==============================================================================
 # Build Stage: Dependencies Installation and Compilation
 # ==============================================================================
-# Using Ubuntu 22.04 LTS as base for better compatibility with wxWidgets 3.2+
-FROM ubuntu:22.04 AS builder
+# Using Ubuntu 24.04 LTS as base for wxWidgets 3.2+ support
+FROM ubuntu:24.04 AS builder
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -39,6 +39,9 @@ RUN apt-get update && apt-get install -y \
     wget \
     tar \
     ca-certificates \
+    curl \
+    zip \
+    unzip \
     # wxWidgets and GUI dependencies
     libwxgtk3.2-dev \
     libgtk-3-dev \
@@ -46,7 +49,7 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-dev \
     freeglut3-dev \
     libglu1-mesa-dev \
-    # Additional required libraries
+    # Additional required libraries (some will also come from vcpkg)
     libboost-all-dev \
     zlib1g-dev \
     libfmt-dev \
@@ -58,6 +61,9 @@ RUN apt-get update && apt-get install -y \
     libxi-dev \
     libxinerama-dev \
     libxxf86vm-dev \
+    # Additional dependencies for building from source
+    autoconf \
+    libtool \
     # Cleanup in same layer to reduce image size
     && rm -rf /var/lib/apt/lists/*
 
@@ -66,11 +72,12 @@ RUN apt-get update && apt-get install -y \
 # ==============================================================================
 # Premake5 is the build configuration tool used by this project.
 # We download and install the latest stable version from GitHub.
+# Using --insecure due to potential certificate chain issues in some environments
 # ==============================================================================
-RUN wget https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-linux.tar.gz \
-    && tar -xzf premake-5.0.0-beta2-linux.tar.gz \
+RUN curl -L --insecure https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/premake-5.0.0-beta2-linux.tar.gz -o premake.tar.gz \
+    && tar -xzf premake.tar.gz \
     && mv premake5 /usr/local/bin/ \
-    && rm premake-5.0.0-beta2-linux.tar.gz \
+    && rm premake.tar.gz \
     && chmod +x /usr/local/bin/premake5
 
 # ==============================================================================
@@ -78,11 +85,14 @@ RUN wget https://github.com/premake/premake-core/releases/download/v5.0.0-beta2/
 # ==============================================================================
 # vcpkg is used to manage C++ dependencies like nlohmann-json, tomlplusplus, etc.
 # We install it from source and integrate it with CMake.
+# Using git config to handle SSL certificate issues in build environments
 # ==============================================================================
-RUN git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg \
+RUN git config --global http.sslVerify false \
+    && git clone https://github.com/Microsoft/vcpkg.git /opt/vcpkg \
     && cd /opt/vcpkg \
     && ./bootstrap-vcpkg.sh \
-    && ln -s /opt/vcpkg/vcpkg /usr/local/bin/vcpkg
+    && ln -s /opt/vcpkg/vcpkg /usr/local/bin/vcpkg \
+    && git config --global --unset http.sslVerify
 
 # Set vcpkg environment variables for CMake integration
 ENV VCPKG_ROOT=/opt/vcpkg
@@ -129,7 +139,7 @@ RUN cd /build \
 # This stage creates a minimal runtime environment with only the necessary
 # runtime dependencies, significantly reducing the final image size.
 # ==============================================================================
-FROM ubuntu:22.04 AS runtime
+FROM ubuntu:24.04 AS runtime
 
 # Prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
@@ -142,20 +152,20 @@ ENV DEBIAN_FRONTEND=noninteractive
 # ==============================================================================
 RUN apt-get update && apt-get install -y \
     # wxWidgets runtime
-    libwxgtk3.2-1 \
+    libwxgtk3.2-1t64 \
     # Graphics runtime
     libgl1 \
     libglu1-mesa \
     freeglut3 \
     # GTK3 runtime
-    libgtk-3-0 \
+    libgtk-3-0t64 \
     # Boost runtime
-    libboost-filesystem1.74.0 \
-    libboost-system1.74.0 \
-    libboost-thread1.74.0 \
+    libboost-filesystem1.83.0 \
+    libboost-system1.83.0 \
+    libboost-thread1.83.0 \
     # Other runtime libraries
     zlib1g \
-    libfmt8 \
+    libfmt9 \
     # X11 runtime for GUI
     libx11-6 \
     libxext6 \
