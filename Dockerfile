@@ -106,6 +106,14 @@ ENV VCPKG_ROOT=/opt/vcpkg
 COPY . /build/
 
 # ==============================================================================
+# Patch premake5.lua for Compatibility
+# ==============================================================================
+# vsprops is not supported in premake5-beta2, comment it out for Linux builds
+# This is only needed for Windows Visual Studio builds anyway
+# ==============================================================================
+RUN sed -i 's/vsprops { VcpkgEnableManifest = "true" }/-- vsprops { VcpkgEnableManifest = "true" } -- Commented for Linux build/g' /build/premake5.lua
+
+# ==============================================================================
 # Install vcpkg Dependencies
 # ==============================================================================
 # Install project-specific dependencies defined in vcpkg.json.

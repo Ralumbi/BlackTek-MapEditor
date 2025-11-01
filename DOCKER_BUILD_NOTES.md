@@ -16,6 +16,14 @@
 
 ## Build Issues and Solutions
 
+### Premake5 vsprops Error
+
+If you see an error like `Error: attempt to call a nil value (global 'vsprops')`:
+
+- **Cause**: The `vsprops` function is not available in premake5-beta2 for Linux
+- **Solution**: The Dockerfiles automatically comment out the vsprops line which is only needed for Windows builds
+- **Manual fix**: If building manually, edit `premake5.lua` line 49 and comment out: `vsprops { VcpkgEnableManifest = "true" }`
+
 ### SSL Certificate Errors
 
 If you encounter SSL certificate errors during build (common in CI/CD environments):
