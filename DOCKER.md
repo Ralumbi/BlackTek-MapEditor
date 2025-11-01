@@ -8,6 +8,15 @@ The Dockerfile uses a multi-stage build approach to create an optimized containe
 - **Build Stage**: Installs all build dependencies and compiles the application
 - **Runtime Stage**: Contains only runtime dependencies for a minimal final image
 
+**Note**: For detailed build information, troubleshooting, and alternative build methods, see [DOCKER_BUILD_NOTES.md](DOCKER_BUILD_NOTES.md).
+
+## Available Dockerfiles
+
+- **`Dockerfile`** (Recommended): Full build using vcpkg for dependency management
+- **`Dockerfile.simple`**: Simplified build using system packages for faster development builds
+
+Choose `Dockerfile` for production and `Dockerfile.simple` for development or if the main build fails.
+
 ## Prerequisites
 
 - Docker Engine 20.10 or later
@@ -22,13 +31,21 @@ The Dockerfile uses a multi-stage build approach to create an optimized containe
 ### Option 1: Using Docker Compose (Recommended)
 
 ```bash
+# For production build (with vcpkg)
 docker-compose build
+
+# For development build (faster, using Dockerfile.simple)
+docker-compose -f docker-compose.yml -f docker-compose.simple.yml build
 ```
 
 ### Option 2: Using Docker CLI
 
 ```bash
+# Production build
 docker build -t blacktek-mapeditor:latest .
+
+# Development build (faster)
+docker build -f Dockerfile.simple -t blacktek-mapeditor:dev .
 ```
 
 ## Running the Application
